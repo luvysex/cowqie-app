@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cowqie Gifts - Stellar Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
     <style>
         :root {
             --primary-orange: #ff7b00;
             --dark-deep: #080400;
             --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --glow: 0 0 15px rgba(255, 123, 0, 0.5);
+            --text-gray: rgba(255, 255, 255, 0.6);
         }
 
         * {
@@ -32,7 +36,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         /* --- ЭКРАН ЗАГРУЗКИ --- */
@@ -45,7 +48,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 1s ease, visibility 1s;
+            transition: opacity 0.8s ease, visibility 0.8s;
         }
 
         canvas#stars {
@@ -71,36 +74,58 @@
         }
 
         .loader-text {
-            font-weight: 300;
-            letter-spacing: 4px;
+            font-family: 'Roboto Mono', monospace; 
+            font-weight: 700;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            font-size: clamp(0.7rem, 2vw, 0.9rem);
-            margin-bottom: 15px;
-            opacity: 0.8;
-            animation: pulseText 2s infinite;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-bottom: 20px;
+            color: var(--primary-orange);
+            text-shadow: 0 0 10px rgba(255, 123, 0, 0.4);
+            animation: pulseText 1.5s infinite alternate;
         }
 
         @keyframes pulseText {
-            0%, 100% { opacity: 0.4; transform: scale(0.98); }
-            50% { opacity: 1; transform: scale(1); }
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
 
         .progress-box {
-            width: clamp(150px, 50vw, 250px);
-            height: 3px;
-            background: rgba(255,255,255,0.1);
+            width: clamp(180px, 60vw, 280px);
+            height: 8px;
+            background: rgba(255,255,255,0.05);
             border-radius: 10px;
             overflow: hidden;
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: var(--primary-orange);
+            background: linear-gradient(90deg, #ff7b00, #ffae00);
             box-shadow: var(--glow);
             transition: width 0.4s ease;
         }
+
+        /* --- HEADER (TON BUTTON) --- */
+        .header-bar {
+            width: 100%;
+            padding: 20px 20px;
+            display: flex;
+            justify-content: flex-end;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 20;
+        }
+
+        /* Кастомизация кнопки TON Connect через CSS */
+        #ton-connect-btn {
+            /* Стили для контейнера кнопки, если нужно подвигать */
+        }
+        
+        /* Скрываем стандартный текст "TON Connect" на мобилках если нужно, 
+           но библиотека сама адаптирует кнопку хорошо */
 
         /* --- ОСНОВНОЙ КОНТЕНТ --- */
         #content {
@@ -108,13 +133,13 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 40px 20px;
+            justify-content: flex-end;
+            padding-bottom: 20px;
             opacity: 0;
             transform: translateY(20px);
-            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 10;
+            position: relative;
         }
 
         body.loaded #content {
@@ -122,25 +147,210 @@
             transform: translateY(0);
         }
 
+        .pages-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px 100px 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- ГЛАВНАЯ СТРАНИЦА (ОБНОВЛЕННАЯ СЕТКА) --- */
         .logo-main {
-            width: clamp(200px, 70vw, 350px);
-            filter: drop-shadow(0 0 30px rgba(0,0,0,0.5));
-            margin-top: auto;
-            margin-bottom: auto;
+            width: clamp(150px, 50vw, 280px);
+            filter: drop-shadow(0 0 30px rgba(255, 123, 0, 0.3));
+            margin-bottom: 30px;
             animation: float 6s infinite ease-in-out;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Две колонки */
+            gap: 15px;
+            width: 100%;
+            max-width: 380px;
         }
 
-        /* --- АДАПТИВНАЯ ПАНЕЛЬ --- */
+        .glass-btn {
+            height: 100px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02), 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        /* Специфичный стиль для кнопки CRASH */
+        .glass-btn.btn-crash {
+            grid-column: span 2; /* Занимает 2 колонки */
+            height: 130px;      /* Выше чем остальные */
+            background: linear-gradient(145deg, rgba(255, 123, 0, 0.1), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(255, 123, 0, 0.3);
+        }
+
+        .glass-btn.btn-crash i {
+            font-size: 2.5rem;
+            color: #ff4800;
+            text-shadow: 0 0 20px rgba(255, 72, 0, 0.6);
+        }
+
+        .glass-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.4s;
+        }
+
+        .glass-btn:active {
+            transform: scale(0.96);
+        }
+
+        .glass-btn i {
+            font-size: 1.8rem;
+            color: var(--primary-orange);
+            text-shadow: 0 0 15px rgba(255, 123, 0, 0.6);
+        }
+
+        /* --- СТРАНИЦА ТОП --- */
+        .empty-state {
+            text-align: center;
+            color: var(--text-gray);
+            padding: 40px;
+            background: var(--glass);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* --- СТРАНИЦА ПРОФИЛЬ --- */
+        .profile-card {
+            width: 100%;
+            max-width: 350px;
+            background: linear-gradient(160deg, rgba(30, 30, 30, 0.6), rgba(10, 10, 10, 0.8));
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #222;
+            border: 3px solid var(--primary-orange);
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow);
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-id {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .stats-row {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .stat-item {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        /* --- АДАПТИВНАЯ ПАНЕЛЬ (НИЗ) --- */
         .nav-glass {
             position: relative;
-            width: 100%;
+            width: 90%;
             max-width: 400px;
-            height: clamp(70px, 10vh, 85px);
+            height: 75px;
             background: var(--glass);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
@@ -150,7 +360,8 @@
             align-items: center;
             padding: 8px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            margin-bottom: env(safe-area-inset-bottom, 20px);
+            margin: 0 auto;
+            flex-shrink: 0;
         }
 
         .jelly-slider {
@@ -159,9 +370,8 @@
             background: linear-gradient(145deg, #ff8c00, #e64500);
             border-radius: 40px;
             z-index: 1;
-            /* Та самая инерция "густого масла" */
-            transition: left 0.9s cubic-bezier(0.25, 1, 0.5, 1), 
-                        width 0.6s ease;
+            transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), 
+                        width 0.4s ease;
             box-shadow: 0 10px 20px rgba(230, 69, 0, 0.3);
         }
 
@@ -175,26 +385,30 @@
             cursor: pointer;
             z-index: 2;
             color: rgba(255, 255, 255, 0.3);
-            transition: color 0.5s ease;
-            font-size: clamp(0.65rem, 2vw, 0.8rem);
+            transition: color 0.4s ease;
+            font-size: 0.75rem;
             font-weight: 600;
         }
 
         .nav-item i {
-            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            font-size: 1.3rem;
         }
 
         .nav-item.active {
             color: #fff;
         }
 
-        /* Фон */
         .bg-glow {
             position: absolute;
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at center, #2e1600 0%, #050300 100%);
             z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
     </style>
 </head>
@@ -214,7 +428,59 @@
     <div class="bg-glow"></div>
 
     <div id="content">
-        <img src="https://i.ibb.co/21znLZ26/226-20260209205851.png" alt="Cowqie Logo" class="logo-main">
+        <div class="header-bar">
+            <div id="ton-connect-btn"></div>
+        </div>
+
+        <div class="pages-container">
+            <div class="page" id="page-0">
+                <h2 style="margin-bottom: 30px;">Топ Игроков</h2>
+                <div class="empty-state">
+                    <i class="fas fa-users-slash"></i>
+                    <p>Список пользователей пуст</p>
+                </div>
+            </div>
+
+            <div class="page active" id="page-1">
+                <img src="https://i.ibb.co/21znLZ26/226-20260209205851.png" alt="Cowqie Logo" class="logo-main">
+                
+                <div class="games-grid">
+                    <div class="glass-btn btn-crash">
+                        <i class="fas fa-rocket"></i>
+                        <span>Crash</span>
+                    </div>
+                    <div class="glass-btn">
+                        <i class="fas fa-bomb"></i>
+                        <span>Mines</span>
+                    </div>
+                    <div class="glass-btn">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Cases</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-2">
+                <div class="profile-card">
+                    <div class="avatar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User">
+                    </div>
+                    <div class="user-name">Cowqie User</div>
+                    <div class="user-id" id="wallet-address">Wallet not connected</div>
+                    
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-val">0</div>
+                            <div class="stat-label">Игр</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-val">0</div>
+                            <div class="stat-label">Побед</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <nav class="nav-glass" id="navBar">
             <div class="jelly-slider" id="slider"></div>
@@ -235,6 +501,47 @@
     </div>
 
     <script>
+        // --- TON CONNECT LOGIC ---
+        // Инициализация кнопки
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://luvysex.github.io/cowqie-app/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-btn'
+        });
+
+        // Настройка UI опций (темная тема, скругления)
+        tonConnectUI.uiOptions = {
+            twaReturnUrl: 'https://t.me/your_bot_name', // Замените на вашу ссылку бота если есть
+            uiPreferences: {
+                theme: 'DARK',
+                borderRadius: 'm',
+                colorsSet: {
+                    connectButton: {
+                        background: '#ff7b00' // Наш оранжевый цвет
+                    }
+                }
+            }
+        };
+
+        // Слушатель событий подключения
+        const unsubscribe = tonConnectUI.onStatusChange(
+            wallet => {
+                const addressEl = document.getElementById('wallet-address');
+                if (wallet) {
+                    // Кошелек подключен
+                    const rawAddress = wallet.account.address;
+                    // Сокращаем адрес для красоты
+                    const shortAddress = rawAddress.slice(0, 4) + '...' + rawAddress.slice(-4);
+                    addressEl.textContent = shortAddress;
+                    addressEl.style.color = '#ff7b00';
+                    console.log('Wallet connected:', wallet);
+                } else {
+                    // Кошелек отключен
+                    addressEl.textContent = 'Wallet not connected';
+                    addressEl.style.color = 'rgba(255,255,255,0.6)';
+                }
+            }
+        );
+
         // --- СИСТЕМА ЧАСТИЦ (ЗВЕЗДЫ) ---
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
@@ -244,16 +551,48 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             particles = [];
-            for(let i=0; i<100; i++) {
+            for(let i=0; i<70; i++) {
                 particles.push({
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: (Math.random() - 0.5) * 2,
-                    size: Math.random() * 2 + 1,
-                    alpha: Math.random()
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5,
+                    size: Math.random() * 4 + 2,
+                    alpha: Math.random(),
+                    rotation: Math.random() * Math.PI
                 });
             }
+        }
+
+        function drawStarShape(ctx, cx, cy, spikes, outerRadius, innerRadius, alpha, rotation) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotation);
+            ctx.beginPath();
+            for (let i = 0; i < spikes; i++) {
+                x = 0 + Math.cos(rot) * outerRadius;
+                y = 0 + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+                x = 0 + Math.cos(rot) * innerRadius;
+                y = 0 + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(0, -outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(255, 123, 0, ${alpha})`;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff7b00';
+            ctx.fill();
+            ctx.restore();
         }
 
         function drawStars() {
@@ -262,17 +601,10 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.alpha += 0.005;
+                p.rotation += 0.02;
                 if(p.alpha > 1) p.alpha = 0;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-                ctx.fillStyle = `rgba(255, 123, 0, ${p.alpha})`;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ff7b00';
-                ctx.fill();
-
-                // Возврат в центр если ушли далеко
-                if(p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                drawStarShape(ctx, p.x, p.y, 5, p.size, p.size/2.5, p.alpha, p.rotation);
+                if(p.x < -20 || p.x > canvas.width + 20 || p.y < -20 || p.y > canvas.height + 20) {
                     p.x = canvas.width / 2;
                     p.y = canvas.height / 2;
                 }
@@ -287,13 +619,11 @@
         window.addEventListener('load', () => {
             initStars();
             drawStars();
-
             let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 15;
+                progress += Math.random() * 10;
                 if(progress > 100) progress = 100;
                 fill.style.width = progress + '%';
-
                 if(progress === 100) {
                     clearInterval(interval);
                     setTimeout(() => {
@@ -301,18 +631,20 @@
                         loader.style.visibility = 'hidden';
                         document.body.classList.add('loaded');
                         syncSlider();
-                    }, 800);
+                    }, 600);
                 }
-            }, 200);
+            }, 150);
         });
 
         // --- ЛОГИКА НАВИГАЦИИ ---
         const navBar = document.getElementById('navBar');
         const items = document.querySelectorAll('.nav-item');
         const slider = document.getElementById('slider');
+        const pages = document.querySelectorAll('.page');
 
         function syncSlider() {
             const active = document.querySelector('.nav-item.active');
+            if(!active) return;
             const rect = active.getBoundingClientRect();
             const parentRect = navBar.getBoundingClientRect();
             slider.style.left = (rect.left - parentRect.left) + 'px';
@@ -324,6 +656,13 @@
                 items.forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
                 syncSlider();
+                const targetId = item.getAttribute('data-index');
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    if(page.id === 'page-' + targetId) {
+                        page.classList.add('active');
+                    }
+                });
             });
         });
 
