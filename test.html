@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cowqie Gifts - Stellar Edition</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-orange: #ff7b00;
+            --dark-deep: #080400;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glow: 0 0 15px rgba(255, 123, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            height: 100vh;
+            background: var(--dark-deep);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- ЭКРАН ЗАГРУЗКИ --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #050300;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease, visibility 1s;
+        }
+
+        canvas#stars {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .loader-ui {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .loader-logo {
+            width: clamp(120px, 40vw, 200px);
+            filter: drop-shadow(var(--glow));
+            margin-bottom: 30px;
+        }
+
+        .loader-text {
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            margin-bottom: 15px;
+            opacity: 0.8;
+            animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .progress-box {
+            width: clamp(150px, 50vw, 250px);
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-orange);
+            box-shadow: var(--glow);
+            transition: width 0.4s ease;
+        }
+
+        /* --- ОСНОВНОЙ КОНТЕНТ --- */
+        #content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 10;
+        }
+
+        body.loaded #content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .logo-main {
+            width: clamp(200px, 70vw, 350px);
+            filter: drop-shadow(0 0 30px rgba(0,0,0,0.5));
+            margin-top: auto;
+            margin-bottom: auto;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* --- АДАПТИВНАЯ ПАНЕЛЬ --- */
+        .nav-glass {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: clamp(70px, 10vh, 85px);
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 45px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            margin-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        .jelly-slider {
+            position: absolute;
+            height: calc(100% - 16px);
+            background: linear-gradient(145deg, #ff8c00, #e64500);
+            border-radius: 40px;
+            z-index: 1;
+            /* Та самая инерция "густого масла" */
+            transition: left 0.9s cubic-bezier(0.25, 1, 0.5, 1), 
+                        width 0.6s ease;
+            box-shadow: 0 10px 20px rgba(230, 69, 0, 0.3);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.5s ease;
+            font-size: clamp(0.65rem, 2vw, 0.8rem);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+        }
+
+        .nav-item.active {
+            color: #fff;
+        }
+
+        /* Фон */
+        .bg-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #2e1600 0%, #050300 100%);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="">
+
+    <div id="loader">
+        <canvas id="stars"></canvas>
+        <div class="loader-ui">
+            <img src="https://i.ibb.co/21znLZ26/226-20260209205851.png" alt="Loading" class="loader-logo">
+            <div class="loader-text">Загрузка...</div>
+            <div class="progress-box">
+                <div class="progress-fill" id="fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-glow"></div>
+
+    <div id="content">
+        <img src="https://i.ibb.co/21znLZ26/226-20260209205851.png" alt="Cowqie Logo" class="logo-main">
+
+        <nav class="nav-glass" id="navBar">
+            <div class="jelly-slider" id="slider"></div>
+            
+            <div class="nav-item" data-index="0">
+                <i class="fas fa-chart-line"></i>
+                <span>Топ</span>
+            </div>
+            <div class="nav-item active" data-index="1">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </div>
+            <div class="nav-item" data-index="2">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // --- СИСТЕМА ЧАСТИЦ (ЗВЕЗДЫ) ---
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<100; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    size: Math.random() * 2 + 1,
+                    alpha: Math.random()
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha += 0.005;
+                if(p.alpha > 1) p.alpha = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fillStyle = `rgba(255, 123, 0, ${p.alpha})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff7b00';
+                ctx.fill();
+
+                // Возврат в центр если ушли далеко
+                if(p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                    p.x = canvas.width / 2;
+                    p.y = canvas.height / 2;
+                }
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        // --- ЛОГИКА ЗАГРУЗКИ ---
+        const fill = document.getElementById('fill');
+        const loader = document.getElementById('loader');
+
+        window.addEventListener('load', () => {
+            initStars();
+            drawStars();
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if(progress > 100) progress = 100;
+                fill.style.width = progress + '%';
+
+                if(progress === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        loader.style.visibility = 'hidden';
+                        document.body.classList.add('loaded');
+                        syncSlider();
+                    }, 800);
+                }
+            }, 200);
+        });
+
+        // --- ЛОГИКА НАВИГАЦИИ ---
+        const navBar = document.getElementById('navBar');
+        const items = document.querySelectorAll('.nav-item');
+        const slider = document.getElementById('slider');
+
+        function syncSlider() {
+            const active = document.querySelector('.nav-item.active');
+            const rect = active.getBoundingClientRect();
+            const parentRect = navBar.getBoundingClientRect();
+            slider.style.left = (rect.left - parentRect.left) + 'px';
+            slider.style.width = rect.width + 'px';
+        }
+
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                items.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                syncSlider();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            syncSlider();
+        });
+    </script>
+</body>
+</html>
